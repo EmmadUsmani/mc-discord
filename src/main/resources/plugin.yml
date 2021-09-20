@@ -1,7 +1,10 @@
 name: MCDiscord
 version: '${project.version}'
-main: com.emmad.mcdiscord.Main
+main: com.emmad.mcdiscord.MCDiscord
 api-version: 1.17
 authors: [ EmmadUsmani ]
 description: In-game commands that perform actions on a Discord server.
 website: https://github.com/EmmadUsmani
+commands:
+  savecoord:
+    description: Saves coordinate.
