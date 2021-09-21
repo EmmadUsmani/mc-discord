@@ -8,7 +8,10 @@ import java.util.HashMap;
 public class CoordinateManager {
     private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
 
-    public static void saveCoordinate(String name, String addedBy, Location location) {
+    public static void saveCoordinate(String name, String addedBy, Location location) throws DuplicateCoordinateException {
+        if (CoordinateManager.coordMap.containsKey(name)) {
+            throw new DuplicateCoordinateException(name);
+        }
         CoordinateManager.coordMap.put(name, new Coordinate(name, addedBy, location));
     }
 
@@ -33,6 +36,12 @@ public class CoordinateManager {
                     + this.location.getBlockX() + " "
                     + this.location.getBlockY() + " "
                     + this.location.getBlockZ();
+        }
+    }
+
+    public static class DuplicateCoordinateException extends Exception {
+        public DuplicateCoordinateException(String name) {
+            super("Coordinate with name \"" + name + "\" already exists.");
         }
     }
 }

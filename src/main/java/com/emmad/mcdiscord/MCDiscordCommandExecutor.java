@@ -62,8 +62,12 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             }
         }
 
-        CoordinateManager.saveCoordinate(name, player.getName(), location);
-        this.plugin.getLogger().info(name + " " + location.getBlockX() + " " + location.getBlockY() + " " + location.getBlockZ());
+        try {
+            CoordinateManager.saveCoordinate(name, player.getName(), location);
+        } catch (CoordinateManager.DuplicateCoordinateException e) {
+            sender.sendMessage(e.getMessage());
+            return false;
+        }
 
         sender.sendMessage("Coordinate saved.");
         return true;
