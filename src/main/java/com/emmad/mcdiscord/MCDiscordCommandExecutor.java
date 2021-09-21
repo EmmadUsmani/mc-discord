@@ -1,5 +1,6 @@
 package com.emmad.mcdiscord;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -34,19 +35,19 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
 
     private boolean handleSaveCoord(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Command must be run by a player.");
+            sender.sendMessage(ChatColor.RED + "Command must be run by a player.");
             return false;
         }
         if (args.length < 1) {
-            sender.sendMessage("Must specify a name for this coordinate.");
+            sender.sendMessage(ChatColor.RED + "Must specify a name for this coordinate.");
             return false;
         }
         if (args.length > 1 && args.length < 4) {
-            sender.sendMessage("Must specify all three coordinates (x, y, z).");
+            sender.sendMessage(ChatColor.RED + "Must specify all three coordinates (x, y, z).");
             return false;
         }
         if (args.length > 4) {
-            sender.sendMessage("Too many arguments.");
+            sender.sendMessage(ChatColor.RED + "Too many arguments.");
             return false;
         }
 
@@ -63,7 +64,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
                 double z = Double.parseDouble(args[3]);
                 location = new Location(player.getWorld(), x, y, z);
             } catch (NumberFormatException e) {
-                sender.sendMessage("Coordinates must be valid decimal numbers.");
+                sender.sendMessage(ChatColor.RED + "Coordinates must be valid decimal numbers.");
                 return false;
             }
         }
@@ -71,23 +72,24 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
         try {
             CoordinateManager.saveCoordinate(name, player.getName(), location);
         } catch (CoordinateManager.DuplicateCoordinateException e) {
-            sender.sendMessage(e.getMessage());
-            return false;
+            sender.sendMessage(ChatColor.RED + e.getMessage());
+            return true;
         }
 
-        sender.sendMessage("Coordinate saved.");
+        sender.sendMessage(ChatColor.GREEN + "Coordinate saved.");
         return true;
     }
 
     private boolean handleListCoords(CommandSender sender, Command command, String label, String[] args) {
         if (args.length > 0) {
-            sender.sendMessage("Too many arguments.");
+            sender.sendMessage(ChatColor.RED + "Too many arguments.");
             return false;
         }
 
         Collection<CoordinateManager.Coordinate> coordinates = CoordinateManager.getCoordinates();
         if (coordinates.isEmpty()) {
-            sender.sendMessage("No coordinates have been saved. Try saving a coordinate with \"/save-coord\".");
+            sender.sendMessage("No coordinates have been saved. Try saving a coordinate with "
+                    + ChatColor.AQUA + "/save-cord" + ChatColor.RESET + ".");
         } else {
             for (CoordinateManager.Coordinate coord : coordinates) {
                 sender.sendMessage(coord.toMinecraftString());
@@ -99,11 +101,11 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
 
     private boolean handleGetCoord(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("Must specify a coordinate name.");
+            sender.sendMessage(ChatColor.RED + "Must specify a coordinate name.");
             return false;
         }
         if (args.length > 1) {
-            sender.sendMessage("Too many arguments.");
+            sender.sendMessage(ChatColor.RED + "Too many arguments.");
             return false;
         }
 

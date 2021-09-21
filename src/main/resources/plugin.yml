@@ -7,8 +7,11 @@ description: In-game commands that perform actions on a Discord server.
 website: https://github.com/EmmadUsmani
 commands:
   save-coord:
-    description: Saves coordinate.
+    description: Saves the given coordinate (or player's location) under the given name.
+    usage: /<command> name [x y z]
   list-coords:
-    description: List all coordinates.
+    description: Displays all saved coordinates.
+    usage: /<command>
   get-coord:
-    description: Get coordinate by name.
+    description: Displays the coordinate with the given name.
+    usage: /<command> name
