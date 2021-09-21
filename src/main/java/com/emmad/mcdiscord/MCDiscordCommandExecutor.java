@@ -12,12 +12,16 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
     public MCDiscordCommandExecutor(MCDiscord plugin) {
         this.plugin = plugin;
         this.plugin.getCommand("save-coord").setExecutor(this);
+        this.plugin.getCommand("list-coords").setExecutor(this);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("save-coord")) {
             return this.handleSaveCoord(sender, command, label, args);
+        }
+        if (command.getName().equalsIgnoreCase("list-coords")) {
+            return this.handleListCoords(sender, command, label, args);
         }
         return false;
     }
@@ -58,10 +62,23 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             }
         }
 
-        CoordManager.saveCoord(name, location);
+        CoordinateManager.saveCoordinate(name, player.getName(), location);
         this.plugin.getLogger().info(name + " " + location.getBlockX() + " " + location.getBlockY() + " " + location.getBlockZ());
 
         sender.sendMessage("Coordinate saved.");
+        return true;
+    }
+
+    private boolean handleListCoords(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0) {
+            sender.sendMessage("Too many arguments.");
+            return false;
+        }
+
+        for (CoordinateManager.Coordinate coord : CoordinateManager.getCoordinates()) {
+            sender.sendMessage(coord.toMinecraftString());
+        }
+
         return true;
     }
 }

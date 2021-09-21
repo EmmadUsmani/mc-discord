@@ -8,3 +8,5 @@ website: https://github.com/EmmadUsmani
 commands:
   save-coord:
     description: Saves coordinate.
+  list-coords:
+    description: List all coordinates.
