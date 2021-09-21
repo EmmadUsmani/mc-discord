@@ -40,26 +40,26 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             return false;
         }
 
-        double x, y, z;
+        Location location;
         String name = args[0];
         Player player = (Player) sender;
 
         if (args.length == 1) {
-            x = player.getLocation().getX();
-            y = player.getLocation().getY();
-            z = player.getLocation().getZ();
+            location = player.getLocation();
         } else {
             try {
-                x = Double.parseDouble(args[1]);
-                y = Double.parseDouble(args[2]);
-                z = Double.parseDouble(args[3]);
+                double x = Double.parseDouble(args[1]);
+                double y = Double.parseDouble(args[2]);
+                double z = Double.parseDouble(args[3]);
+                location = new Location(player.getWorld(), x, y, z);
             } catch (NumberFormatException e) {
                 sender.sendMessage("Coordinates must be valid decimal numbers.");
                 return false;
             }
         }
 
-        this.plugin.getLogger().info(name + " " + x + " " + y + " " + z);
+        CoordManager.saveCoord(name, location);
+        this.plugin.getLogger().info(name + " " + location.getBlockX() + " " + location.getBlockY() + " " + location.getBlockZ());
 
         sender.sendMessage("Coordinate saved.");
         return true;
