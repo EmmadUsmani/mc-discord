@@ -10,3 +10,5 @@ commands:
     description: Saves coordinate.
   list-coords:
     description: List all coordinates.
+  get-coord:
+    description: Get coordinate by name.
