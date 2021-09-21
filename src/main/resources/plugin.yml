@@ -6,5 +6,5 @@ authors: [ EmmadUsmani ]
 description: In-game commands that perform actions on a Discord server.
 website: https://github.com/EmmadUsmani
 commands:
-  savecoord:
+  save-coord:
     description: Saves coordinate.
