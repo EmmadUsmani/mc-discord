@@ -78,6 +78,9 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             sender.sendMessage(ChatColor.GREEN + "Coordinate saved.");
         } catch (CoordinateManager.DuplicateCoordinateException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
+        } catch (DiscordWebhook.RequestFailedException e) {
+            sender.sendMessage(ChatColor.DARK_RED + "Failed to save coordinate, see server log.");
+            this.plugin.getLogger().info(e.getMessage());
         }
 
         return true;

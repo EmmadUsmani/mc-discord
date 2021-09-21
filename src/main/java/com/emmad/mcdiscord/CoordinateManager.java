@@ -9,34 +9,17 @@ import java.util.HashMap;
 
 public class CoordinateManager {
     private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
-    private static final String discordURL = "https://discord.com/api/webhooks/888537014268485722/Qg-8swhzjU2lmHYrfyRV-aSWBz7_Tm4KCgZz2ABlukiLQw0Lfd7ke7DQcIJJz9JEwYf3";
-    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
 
     public static void saveCoordinate(String name, String addedBy, Location location)
-            throws DuplicateCoordinateException {
+            throws DuplicateCoordinateException, DiscordWebhook.RequestFailedException {
         name = CoordinateManager.normalizeName(name);
         if (CoordinateManager.coordMap.containsKey(name)) {
             throw new DuplicateCoordinateException(name);
         }
 
-        // send http request
-        try {
-            OkHttpClient client = new OkHttpClient();
-            ObjectMapper mapper = new ObjectMapper();
-
-            DiscordReqBody discordReqBody = new DiscordReqBody(name + " " + addedBy);
-
-            String jsonStr = mapper.writeValueAsString(discordReqBody);
-
-            RequestBody body = RequestBody.create(jsonStr, JSON);
-            Request request = new Request.Builder().url(CoordinateManager.discordURL)
-                    .post(body).build();
-            Response response = client.newCall(request).execute();
-            System.out.println(response.body().byteString());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
+        Coordinate coord = new Coordinate(name, addedBy, location);
+        DiscordWebhook.saveCoordinate(coord);
         CoordinateManager.coordMap.put(name, new Coordinate(name, addedBy, location));
     }
 
@@ -89,13 +72,13 @@ public class CoordinateManager {
                     + this.location.getBlockY() + " "
                     + this.location.getBlockZ();
         }
-    }
 
-    public static class DiscordReqBody {
-        public String content;
-
-        public DiscordReqBody(String content) {
-            this.content = content;
+        public String toDiscordString() {
+            return this.name + "\n"
+                    + this.addedBy + "\n"
+                    + this.location.getBlockX() + " "
+                    + this.location.getBlockY() + " "
+                    + this.location.getBlockZ();
         }
     }
 
