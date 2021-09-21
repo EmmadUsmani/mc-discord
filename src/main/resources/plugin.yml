@@ -9,6 +9,9 @@ commands:
   save-coord:
     description: Saves the given coordinate (or player's location) under the given name.
     usage: /<command> name [x y z]
+  delete-coord:
+    description: Deletes the coordinate with the given name, if the player created it.
+    usage: /<command> name
   list-coords:
     description: Displays all saved coordinates.
     usage: /<command>

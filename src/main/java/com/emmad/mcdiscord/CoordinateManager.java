@@ -8,12 +8,28 @@ import java.util.HashMap;
 public class CoordinateManager {
     private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
 
-    public static void saveCoordinate(String name, String addedBy, Location location) throws DuplicateCoordinateException {
+    public static void saveCoordinate(String name, String addedBy, Location location)
+            throws DuplicateCoordinateException {
         name = CoordinateManager.normalizeName(name);
         if (CoordinateManager.coordMap.containsKey(name)) {
             throw new DuplicateCoordinateException(name);
         }
         CoordinateManager.coordMap.put(name, new Coordinate(name, addedBy, location));
+    }
+
+    public static void deleteCoordinate(String name, String playerName)
+            throws CoordinateDoesNotExistException, PlayerLacksPermissionException {
+        name = CoordinateManager.normalizeName(name);
+        if (!CoordinateManager.coordMap.containsKey(name)) {
+            throw new CoordinateDoesNotExistException(name);
+        }
+
+        Coordinate coord = CoordinateManager.coordMap.get(name);
+        if (!playerName.equals(coord.addedBy)) {
+            throw new PlayerLacksPermissionException(coord.addedBy);
+        }
+
+        CoordinateManager.coordMap.remove(name);
     }
 
     public static Collection<Coordinate> getCoordinates() {
@@ -61,6 +77,12 @@ public class CoordinateManager {
     public static class CoordinateDoesNotExistException extends Exception {
         public CoordinateDoesNotExistException(String name) {
             super("Coordinate with name \"" + name + "\" does not exist.");
+        }
+    }
+
+    public static class PlayerLacksPermissionException extends Exception {
+        public PlayerLacksPermissionException(String name) {
+            super("You cannot a delete coordinate created by another player (" + name + ").");
         }
     }
 }

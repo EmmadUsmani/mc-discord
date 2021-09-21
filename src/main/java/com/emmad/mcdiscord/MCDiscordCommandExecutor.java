@@ -15,6 +15,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
     public MCDiscordCommandExecutor(MCDiscord plugin) {
         this.plugin = plugin;
         this.plugin.getCommand("save-coord").setExecutor(this);
+        this.plugin.getCommand("delete-coord").setExecutor(this);
         this.plugin.getCommand("list-coords").setExecutor(this);
         this.plugin.getCommand("get-coord").setExecutor(this);
     }
@@ -23,6 +24,9 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("save-coord")) {
             return this.handleSaveCoord(sender, command, label, args);
+        }
+        if (command.getName().equalsIgnoreCase("delete-coord")) {
+            return this.handleDeleteCoord(sender, command, label, args);
         }
         if (command.getName().equalsIgnoreCase("list-coords")) {
             return this.handleListCoords(sender, command, label, args);
@@ -36,7 +40,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
     private boolean handleSaveCoord(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Command must be run by a player.");
-            return false;
+            return true;
         }
         if (args.length < 1) {
             sender.sendMessage(ChatColor.RED + "Must specify a name for this coordinate.");
@@ -71,12 +75,36 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
 
         try {
             CoordinateManager.saveCoordinate(name, player.getName(), location);
+            sender.sendMessage(ChatColor.GREEN + "Coordinate saved.");
         } catch (CoordinateManager.DuplicateCoordinateException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
-            return true;
         }
 
-        sender.sendMessage(ChatColor.GREEN + "Coordinate saved.");
+        return true;
+    }
+
+    private boolean handleDeleteCoord(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "Command must be run by a player.");
+            return true;
+        }
+        if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "Must specify a coordinate name.");
+            return false;
+        }
+        if (args.length > 1) {
+            sender.sendMessage(ChatColor.RED + "Too many arguments.");
+            return false;
+        }
+
+        String name = args[0];
+        try {
+            CoordinateManager.deleteCoordinate(name, sender.getName());
+            sender.sendMessage(ChatColor.GREEN + "Coordinate deleted.");
+        } catch (CoordinateManager.CoordinateDoesNotExistException
+                | CoordinateManager.PlayerLacksPermissionException e) {
+            sender.sendMessage(ChatColor.RED + e.getMessage());
+        }
         return true;
     }
 
@@ -88,7 +116,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
 
         Collection<CoordinateManager.Coordinate> coordinates = CoordinateManager.getCoordinates();
         if (coordinates.isEmpty()) {
-            sender.sendMessage("No coordinates have been saved. Try saving a coordinate with "
+            sender.sendMessage("There are no saved coordinates. You can save a coordinate with "
                     + ChatColor.AQUA + "/save-cord" + ChatColor.RESET + ".");
         } else {
             for (CoordinateManager.Coordinate coord : coordinates) {
@@ -110,15 +138,13 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
         }
 
         String name = args[0];
-        CoordinateManager.Coordinate coord;
         try {
-            coord = CoordinateManager.getCoordinate(name);
+            CoordinateManager.Coordinate coord = CoordinateManager.getCoordinate(name);
+            sender.sendMessage(coord.toMinecraftString());
         } catch (CoordinateManager.CoordinateDoesNotExistException e) {
-            sender.sendMessage(e.getMessage());
-            return false;
+            sender.sendMessage(ChatColor.RED + e.getMessage());
         }
 
-        sender.sendMessage(coord.toMinecraftString());
         return true;
     }
 }
