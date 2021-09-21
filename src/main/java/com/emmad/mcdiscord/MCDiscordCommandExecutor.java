@@ -6,6 +6,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+
 public class MCDiscordCommandExecutor implements CommandExecutor {
     private final MCDiscord plugin;
 
@@ -83,8 +85,13 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             return false;
         }
 
-        for (CoordinateManager.Coordinate coord : CoordinateManager.getCoordinates()) {
-            sender.sendMessage(coord.toMinecraftString());
+        Collection<CoordinateManager.Coordinate> coordinates = CoordinateManager.getCoordinates();
+        if (coordinates.isEmpty()) {
+            sender.sendMessage("No coordinates have been saved. Try saving a coordinate with \"/save-coord\".");
+        } else {
+            for (CoordinateManager.Coordinate coord : coordinates) {
+                sender.sendMessage(coord.toMinecraftString());
+            }
         }
 
         return true;
