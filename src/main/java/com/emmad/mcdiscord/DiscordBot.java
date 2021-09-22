@@ -1,20 +1,14 @@
 package com.emmad.mcdiscord;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class DiscordBot {
-    private static final String channelID = "888536979338313731";
-
-    public static final DiscordApi discordApi = new DiscordApiBuilder()
-            .setToken("ODkwMjU2MDYyMTY1NDE4MDA1.YUtJkQ.DmAfk1sZYRYFxtq_PUl_6HhrlJM")
-            .login().join();
+    public static String channelID;
+    public static DiscordApi discordApi;
 
     public static void postCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
         try {
