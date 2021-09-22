@@ -36,9 +36,9 @@ public class CoordinateManager {
             throw new DuplicateCoordinateException(name);
         }
 
-        Coordinate coord = new Coordinate(name, addedBy, location);
-        DiscordBot.postCoordinateMessage(coord);
-        CoordinateManager.coordMap.put(name, new Coordinate(name, addedBy, location));
+        Coordinate coordinate = new Coordinate(name, addedBy, location);
+        DiscordBot.postCoordinateMessage(coordinate);
+        CoordinateManager.coordMap.put(name, coordinate);
     }
 
     public static void deleteCoordinate(String name, String playerName)
