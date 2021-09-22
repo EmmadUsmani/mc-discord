@@ -1,7 +1,5 @@
 package com.emmad.mcdiscord;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.*;
 import org.bukkit.Location;
 
 import java.util.Collection;
@@ -10,16 +8,15 @@ import java.util.HashMap;
 public class CoordinateManager {
     private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
 
-
     public static void saveCoordinate(String name, String addedBy, Location location)
-            throws DuplicateCoordinateException, DiscordWebhook.RequestFailedException {
+            throws DuplicateCoordinateException, DiscordBot.RequestFailedException {
         name = CoordinateManager.normalizeName(name);
         if (CoordinateManager.coordMap.containsKey(name)) {
             throw new DuplicateCoordinateException(name);
         }
 
         Coordinate coord = new Coordinate(name, addedBy, location);
-        DiscordWebhook.saveCoordinate(coord);
+        DiscordBot.saveCoordinate(coord);
         CoordinateManager.coordMap.put(name, new Coordinate(name, addedBy, location));
     }
 
