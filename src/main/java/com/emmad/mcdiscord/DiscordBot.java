@@ -16,7 +16,7 @@ public class DiscordBot {
             .setToken("ODkwMjU2MDYyMTY1NDE4MDA1.YUtJkQ.DmAfk1sZYRYFxtq_PUl_6HhrlJM")
             .login().join();
 
-    public static void postCoordinate(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
+    public static void postCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
         try {
             Optional<TextChannel> optionalTextChannel = DiscordBot.discordApi.getTextChannelById(channelID);
             if (!optionalTextChannel.isPresent()) {
@@ -24,13 +24,14 @@ public class DiscordBot {
             }
             TextChannel textChannel = optionalTextChannel.get();
 
-            textChannel.sendMessage(coordinate.toDiscordString()).join();
+            Message message = textChannel.sendMessage(coordinate.toDiscordString()).join();
+            coordinate.setMessageId(message.getIdAsString());
         } catch (Exception e) {
             throw new RequestFailedException(e.getMessage());
         }
     }
 
-    public static List<String> getCoordinateMessages() throws RequestFailedException {
+    public static void deleteCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
         try {
             Optional<TextChannel> optionalTextChannel = DiscordBot.discordApi.getTextChannelById(channelID);
             if (!optionalTextChannel.isPresent()) {
@@ -38,13 +39,21 @@ public class DiscordBot {
             }
             TextChannel textChannel = optionalTextChannel.get();
 
-            Message[] messages = textChannel.getMessagesAsStream().toArray(Message[]::new);
-            List<String> msgContentList = new ArrayList<>();
-            for (Message message : messages) {
-                msgContentList.add(message.getContent());
-            }
+            textChannel.deleteMessages(coordinate.messageId).join();
+        } catch (Exception e) {
+            throw new RequestFailedException(e.getMessage());
+        }
+    }
 
-            return msgContentList;
+    public static Message[] getCoordinateMessages() throws RequestFailedException {
+        try {
+            Optional<TextChannel> optionalTextChannel = DiscordBot.discordApi.getTextChannelById(channelID);
+            if (!optionalTextChannel.isPresent()) {
+                throw new Exception("Text channel with provided id " + channelID + "does not exist.");
+            }
+            TextChannel textChannel = optionalTextChannel.get();
+
+            return textChannel.getMessagesAsStream().toArray(Message[]::new);
         } catch (Exception e) {
             throw new RequestFailedException(e.getMessage());
         }

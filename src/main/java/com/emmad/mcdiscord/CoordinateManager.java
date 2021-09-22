@@ -2,24 +2,25 @@ package com.emmad.mcdiscord;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.javacord.api.entity.message.Message;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 public class CoordinateManager {
     private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
 
     public static void loadCoordinates() throws DiscordBot.RequestFailedException {
-        List<String> coordinateMessages = DiscordBot.getCoordinateMessages();
+        Message[] messages = DiscordBot.getCoordinateMessages();
 
-        for (String message : coordinateMessages) {
+        for (Message message : messages) {
             try {
-                Coordinate coordinate = deserializeCoordinate(message);
+                Coordinate coordinate = deserializeCoordinate(message.getContent());
                 if (coordMap.containsKey(coordinate.name)) {
                     throw new DuplicateCoordinateException(coordinate.name);
                 } else {
+                    coordinate.setMessageId(message.getIdAsString());
                     coordMap.put(coordinate.name, coordinate);
                 }
             } catch (Exception e) {
@@ -36,22 +37,23 @@ public class CoordinateManager {
         }
 
         Coordinate coord = new Coordinate(name, addedBy, location);
-        DiscordBot.postCoordinate(coord);
+        DiscordBot.postCoordinateMessage(coord);
         CoordinateManager.coordMap.put(name, new Coordinate(name, addedBy, location));
     }
 
     public static void deleteCoordinate(String name, String playerName)
-            throws CoordinateDoesNotExistException, PlayerLacksPermissionException {
+            throws CoordinateDoesNotExistException, PlayerLacksPermissionException, DiscordBot.RequestFailedException {
         name = CoordinateManager.normalizeName(name);
         if (!CoordinateManager.coordMap.containsKey(name)) {
             throw new CoordinateDoesNotExistException(name);
         }
 
-        Coordinate coord = CoordinateManager.coordMap.get(name);
-        if (!playerName.equals(coord.addedBy)) {
-            throw new PlayerLacksPermissionException(coord.addedBy);
+        Coordinate coordinate = CoordinateManager.coordMap.get(name);
+        if (!playerName.equals(coordinate.addedBy)) {
+            throw new PlayerLacksPermissionException(coordinate.addedBy);
         }
 
+        DiscordBot.deleteCoordinateMessage(coordinate);
         CoordinateManager.coordMap.remove(name);
     }
 
@@ -67,10 +69,10 @@ public class CoordinateManager {
         return CoordinateManager.coordMap.get(name);
     }
 
-    private static Coordinate deserializeCoordinate(String message) throws InvalidMessageException {
-        String[] lines = message.split("\n");
+    private static Coordinate deserializeCoordinate(String messageContent) throws InvalidMessageException {
+        String[] lines = messageContent.split("\n");
         if (lines.length != 3) {
-            throw new InvalidMessageException(message);
+            throw new InvalidMessageException(messageContent);
         }
 
         String name = lines[0];
@@ -79,13 +81,13 @@ public class CoordinateManager {
         String locationStr = lines[2];
         String[] values = locationStr.split(" ");
         if (values.length != 3) {
-            throw new InvalidMessageException(message);
+            throw new InvalidMessageException(messageContent);
         }
         double[] doubleValues;
         try {
             doubleValues = Arrays.stream(values).mapToDouble(Double::parseDouble).toArray();
         } catch (NumberFormatException e) {
-            throw new InvalidMessageException(message);
+            throw new InvalidMessageException(messageContent);
         }
         Location location = new Location(Bukkit.getWorld("world"), doubleValues[0],
                 doubleValues[1], doubleValues[2]);
@@ -101,11 +103,16 @@ public class CoordinateManager {
         public String name;
         public String addedBy;
         public Location location;
+        public String messageId;
 
         public Coordinate(String name, String addedBy, Location location) {
             this.name = name;
             this.addedBy = addedBy;
             this.location = location;
+        }
+
+        public void setMessageId(String id) {
+            this.messageId = id;
         }
 
         public String toMinecraftString() {
@@ -126,8 +133,8 @@ public class CoordinateManager {
     }
 
     public static class InvalidMessageException extends Exception {
-        public InvalidMessageException(String coordMsg) {
-            super("Message: " + coordMsg + "\nis not a valid coordinate.");
+        public InvalidMessageException(String coordinateMessageContent) {
+            super("Message:\n" + coordinateMessageContent + "\nis not a valid coordinate.");
         }
     }
 

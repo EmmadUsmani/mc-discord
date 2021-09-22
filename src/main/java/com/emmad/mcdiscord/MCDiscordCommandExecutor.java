@@ -107,6 +107,9 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
         } catch (CoordinateManager.CoordinateDoesNotExistException
                 | CoordinateManager.PlayerLacksPermissionException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
+        } catch (DiscordBot.RequestFailedException e) {
+            sender.sendMessage(ChatColor.DARK_RED + "Failed to delete coordinate, see server log.");
+            this.plugin.getLogger().info(e.getMessage());
         }
         return true;
     }
