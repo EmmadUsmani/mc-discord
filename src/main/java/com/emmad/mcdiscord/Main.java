@@ -1,5 +1,7 @@
 package com.emmad.mcdiscord;
 
+import com.emmad.mcdiscord.coordinate.CoordinateCommandExecutor;
+import com.emmad.mcdiscord.coordinate.CoordinateManager;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 

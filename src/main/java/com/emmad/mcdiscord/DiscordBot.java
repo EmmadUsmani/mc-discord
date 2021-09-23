@@ -1,5 +1,6 @@
 package com.emmad.mcdiscord;
 
+import com.emmad.mcdiscord.coordinate.CoordinateManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.javacord.api.DiscordApi;
