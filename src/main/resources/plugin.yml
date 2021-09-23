@@ -1,6 +1,6 @@
 name: MCDiscord
 version: '${project.version}'
-main: com.emmad.mcdiscord.MCDiscord
+main: com.emmad.mcdiscord.Main
 api-version: 1.17
 authors: [ EmmadUsmani ]
 description: In-game commands that perform actions on a Discord server.
