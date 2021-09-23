@@ -96,7 +96,7 @@ public class CoordinateManager {
     }
 
     private static String normalizeName(String name) {
-        return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+        return name.toLowerCase();
     }
 
     public static class Coordinate {

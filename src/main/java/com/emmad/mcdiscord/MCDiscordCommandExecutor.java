@@ -43,15 +43,17 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "Must specify a name for this coordinate.");
+            sender.sendMessage(ChatColor.RED + "Must specify a one word name for this coordinate.");
             return false;
         }
         if (args.length > 1 && args.length < 4) {
-            sender.sendMessage(ChatColor.RED + "Must specify all three coordinates (x, y, z).");
+            sender.sendMessage(ChatColor.RED + "Incorrect number of arguments. Make sure your coordinate name " +
+                    "is only one word and that you are specifying either 0 or 3 coordinates (x y z).");
             return false;
         }
         if (args.length > 4) {
-            sender.sendMessage(ChatColor.RED + "Too many arguments.");
+            sender.sendMessage(ChatColor.RED + "Incorrect number of arguments. Make sure your coordinate name " +
+                    "is only one word and that you are specifying either 0 or 3 coordinates (x y z).");
             return false;
         }
 
