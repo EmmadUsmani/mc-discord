@@ -152,7 +152,7 @@ public class CoordinateManager {
 
     public static class PlayerLacksPermissionException extends Exception {
         public PlayerLacksPermissionException(String name) {
-            super("You cannot a delete coordinate created by another player (" + name + ").");
+            super("You cannot delete a coordinate created by another player (" + name + ").");
         }
     }
 }
