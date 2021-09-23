@@ -42,7 +42,7 @@ public class CoordinateManager {
                     coordinateMap.put(coordinate.name, coordinate);
                 }
             } catch (Exception e) {
-                plugin.getLogger().info(ChatColor.YELLOW + e.getMessage());
+                plugin.getLogger().warning(e.getMessage());
             }
         }
     }

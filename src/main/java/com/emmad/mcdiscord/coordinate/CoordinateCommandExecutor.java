@@ -95,7 +95,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             CommandResponse.userError(sender, e.getMessage());
         } catch (DiscordBot.RequestFailedException e) {
             CommandResponse.serverError(sender, "Failed to save coordinate, see server log.");
-            plugin.getLogger().info(e.getMessage());
+            plugin.getLogger().severe(e.getMessage());
         }
 
         return true;
@@ -124,7 +124,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             CommandResponse.userError(sender, e.getMessage());
         } catch (DiscordBot.RequestFailedException e) {
             CommandResponse.serverError(sender, "Failed to delete coordinate, see server log.");
-            plugin.getLogger().info(e.getMessage());
+            plugin.getLogger().severe(e.getMessage());
         }
         return true;
     }
