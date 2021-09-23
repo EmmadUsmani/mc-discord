@@ -1,55 +1,78 @@
 package com.emmad.mcdiscord;
 
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.javacord.api.DiscordApi;
+import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 
 import java.util.Optional;
 
 public class DiscordBot {
-    public static String channelID;
-    public static DiscordApi discordApi;
+    private final DiscordApi api;
+    private final TextChannel coordinateChannel;
 
-    public static void postCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
+    public DiscordBot(JavaPlugin plugin) throws InitializationFailedException {
+        FileConfiguration config = plugin.getConfig();
+        String botToken = config.getString("discord-bot-token");
+        if (botToken == null) {
+            throw new InitializationFailedException("\"discord-bot-token\" not provided in config.yml.");
+        }
+        String channelId = config.getString("discord-coordinate-channel-id");
+        if (channelId == null) {
+            throw new InitializationFailedException("\"discord-coordinate-channel-id\" not provided in config.yml.");
+        }
+
         try {
-            Optional<TextChannel> optionalTextChannel = DiscordBot.discordApi.getTextChannelById(channelID);
-            if (!optionalTextChannel.isPresent()) {
-                throw new Exception("Text channel with provided id " + channelID + "does not exist.");
-            }
-            TextChannel textChannel = optionalTextChannel.get();
+            this.api = new DiscordApiBuilder().setToken(botToken).login().join();
+        } catch (Exception e) {
+            throw new InitializationFailedException("Failed to initialize DiscordApi." +
+                    " Make sure the bot token you provided is valid.");
+        }
 
-            Message message = textChannel.sendMessage(coordinate.toDiscordString()).join();
+        Optional<TextChannel> optional = api.getTextChannelById(channelId);
+        if (!optional.isPresent()) {
+            throw new InitializationFailedException("Coordinate text channel with provided id "
+                    + channelId + " does not exist.");
+        }
+        this.coordinateChannel = optional.get();
+    }
+
+    public void postCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
+        try {
+            Message message = coordinateChannel.sendMessage(coordinate.toDiscordString()).join();
             coordinate.setMessageId(message.getIdAsString());
         } catch (Exception e) {
             throw new RequestFailedException(e.getMessage());
         }
     }
 
-    public static void deleteCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
+    public void deleteCoordinateMessage(CoordinateManager.Coordinate coordinate) throws RequestFailedException {
         try {
-            Optional<TextChannel> optionalTextChannel = DiscordBot.discordApi.getTextChannelById(channelID);
-            if (!optionalTextChannel.isPresent()) {
-                throw new Exception("Text channel with provided id " + channelID + "does not exist.");
-            }
-            TextChannel textChannel = optionalTextChannel.get();
-
-            textChannel.deleteMessages(coordinate.messageId).join();
+            coordinateChannel.deleteMessages(coordinate.messageId).join();
         } catch (Exception e) {
             throw new RequestFailedException(e.getMessage());
         }
     }
 
-    public static Message[] getCoordinateMessages() throws RequestFailedException {
+    public Message[] getCoordinateMessages() throws RequestFailedException {
         try {
-            Optional<TextChannel> optionalTextChannel = DiscordBot.discordApi.getTextChannelById(channelID);
-            if (!optionalTextChannel.isPresent()) {
-                throw new Exception("Text channel with provided id " + channelID + "does not exist.");
-            }
-            TextChannel textChannel = optionalTextChannel.get();
-
-            return textChannel.getMessagesAsStream().toArray(Message[]::new);
+            return coordinateChannel.getMessagesAsStream().toArray(Message[]::new);
         } catch (Exception e) {
             throw new RequestFailedException(e.getMessage());
+        }
+    }
+
+    public void disconnect() {
+        try {
+            api.disconnect();
+        } catch (Exception ignored) {}
+    }
+
+    public static class InitializationFailedException extends Exception {
+        public InitializationFailedException(String message) {
+            super(message);
         }
     }
 

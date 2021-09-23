@@ -9,10 +9,11 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class CoordinateManager {
+    public static DiscordBot discordBot;
     private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
 
     public static void loadCoordinates() throws DiscordBot.RequestFailedException {
-        Message[] messages = DiscordBot.getCoordinateMessages();
+        Message[] messages = discordBot.getCoordinateMessages();
 
         for (Message message : messages) {
             try {
@@ -37,7 +38,7 @@ public class CoordinateManager {
         }
 
         Coordinate coordinate = new Coordinate(name, addedBy, location);
-        DiscordBot.postCoordinateMessage(coordinate);
+        discordBot.postCoordinateMessage(coordinate);
         CoordinateManager.coordMap.put(name, coordinate);
     }
 
@@ -53,7 +54,7 @@ public class CoordinateManager {
             throw new PlayerLacksPermissionException(coordinate.addedBy);
         }
 
-        DiscordBot.deleteCoordinateMessage(coordinate);
+        discordBot.deleteCoordinateMessage(coordinate);
         CoordinateManager.coordMap.remove(name);
     }
 
