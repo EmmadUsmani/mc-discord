@@ -2,6 +2,7 @@ package com.emmad.mcdiscord.coordinate;
 
 import com.emmad.mcdiscord.DiscordBot;
 import com.emmad.mcdiscord.Main;
+import com.emmad.mcdiscord.util.CommandResponse;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -51,20 +52,20 @@ public class CoordinateCommandExecutor implements CommandExecutor {
 
     private boolean handleSaveCoord(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "Command must be run by a player.");
+            CommandResponse.userError(sender, "Command must be run by a player.");
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "Must specify a one word name for this coordinate.");
+            CommandResponse.userError(sender, "Must specify a one word name for this coordinate.");
             return false;
         }
         if (args.length > 1 && args.length < 4) {
-            sender.sendMessage(ChatColor.RED + "Incorrect number of arguments. Make sure your coordinate name " +
+            CommandResponse.userError(sender, "Incorrect number of arguments. Make sure your coordinate name " +
                     "is only one word and that you are specifying either 0 or 3 coordinates (x y z).");
             return false;
         }
         if (args.length > 4) {
-            sender.sendMessage(ChatColor.RED + "Incorrect number of arguments. Make sure your coordinate name " +
+            CommandResponse.userError(sender, "Incorrect number of arguments. Make sure your coordinate name " +
                     "is only one word and that you are specifying either 0 or 3 coordinates (x y z).");
             return false;
         }
@@ -82,18 +83,18 @@ public class CoordinateCommandExecutor implements CommandExecutor {
                 double z = Double.parseDouble(args[3]);
                 location = new Location(player.getWorld(), x, y, z);
             } catch (NumberFormatException e) {
-                sender.sendMessage(ChatColor.RED + "Coordinates must be valid decimal numbers.");
+                CommandResponse.userError(sender, "Coordinates must be valid decimal numbers.");
                 return false;
             }
         }
 
         try {
             coordinateManager.saveCoordinate(name, player.getName(), location);
-            sender.sendMessage(ChatColor.GREEN + "Coordinate saved.");
+            CommandResponse.confirmation(sender, "Coordinate saved.");
         } catch (CoordinateManager.DuplicateCoordinateException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
+            CommandResponse.userError(sender, e.getMessage());
         } catch (DiscordBot.RequestFailedException e) {
-            sender.sendMessage(ChatColor.DARK_RED + "Failed to save coordinate, see server log.");
+            CommandResponse.serverError(sender, "Failed to save coordinate, see server log.");
             plugin.getLogger().info(e.getMessage());
         }
 
@@ -102,27 +103,27 @@ public class CoordinateCommandExecutor implements CommandExecutor {
 
     private boolean handleDeleteCoord(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "Command must be run by a player.");
+            CommandResponse.userError(sender, "Command must be run by a player.");
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "Must specify a coordinate name.");
+            CommandResponse.userError(sender, "Must specify a coordinate name.");
             return false;
         }
         if (args.length > 1) {
-            sender.sendMessage(ChatColor.RED + "Too many arguments.");
+            CommandResponse.userError(sender, "Too many arguments.");
             return false;
         }
 
         String name = args[0];
         try {
             coordinateManager.deleteCoordinate(name, sender.getName());
-            sender.sendMessage(ChatColor.GREEN + "Coordinate deleted.");
+            CommandResponse.confirmation(sender, "Coordinate deleted.");
         } catch (CoordinateManager.CoordinateDoesNotExistException
                 | CoordinateManager.PlayerLacksPermissionException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
+            CommandResponse.userError(sender, e.getMessage());
         } catch (DiscordBot.RequestFailedException e) {
-            sender.sendMessage(ChatColor.DARK_RED + "Failed to delete coordinate, see server log.");
+            CommandResponse.serverError(sender, "Failed to delete coordinate, see server log.");
             plugin.getLogger().info(e.getMessage());
         }
         return true;
@@ -130,17 +131,17 @@ public class CoordinateCommandExecutor implements CommandExecutor {
 
     private boolean handleListCoords(CommandSender sender, Command command, String label, String[] args) {
         if (args.length > 0) {
-            sender.sendMessage(ChatColor.RED + "Too many arguments.");
+            CommandResponse.userError(sender, "Too many arguments.");
             return false;
         }
 
         Collection<CoordinateManager.Coordinate> coordinates = coordinateManager.getCoordinates();
         if (coordinates.isEmpty()) {
-            sender.sendMessage("There are no saved coordinates. You can save a coordinate with "
+            CommandResponse.info(sender, "There are no saved coordinates. You can save a coordinate with "
                     + ChatColor.AQUA + "/save-cord" + ChatColor.RESET + ".");
         } else {
             for (CoordinateManager.Coordinate coordinate : coordinates) {
-                sender.sendMessage(coordinate.toMinecraftString());
+                CommandResponse.info(sender, coordinate.toMinecraftString());
             }
         }
 
@@ -149,20 +150,20 @@ public class CoordinateCommandExecutor implements CommandExecutor {
 
     private boolean handleGetCoord(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "Must specify a coordinate name.");
+            CommandResponse.userError(sender, "Must specify a coordinate name.");
             return false;
         }
         if (args.length > 1) {
-            sender.sendMessage(ChatColor.RED + "Too many arguments.");
+            CommandResponse.userError(sender, "Too many arguments.");
             return false;
         }
 
         String name = args[0];
         try {
             CoordinateManager.Coordinate coordinate = coordinateManager.getCoordinate(name);
-            sender.sendMessage(coordinate.toMinecraftString());
+            CommandResponse.info(sender, coordinate.toMinecraftString());
         } catch (CoordinateManager.CoordinateDoesNotExistException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
+            CommandResponse.userError(sender, e.getMessage());
         }
 
         return true;
