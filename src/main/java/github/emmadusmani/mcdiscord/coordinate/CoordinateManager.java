@@ -1,8 +1,7 @@
-package com.emmad.mcdiscord.coordinate;
+package github.emmadusmani.mcdiscord.coordinate;
 
-import com.emmad.mcdiscord.DiscordBot;
+import github.emmadusmani.mcdiscord.DiscordBot;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.javacord.api.entity.message.Message;

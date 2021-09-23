@@ -1,7 +1,7 @@
-package com.emmad.mcdiscord;
+package github.emmadusmani.mcdiscord;
 
-import com.emmad.mcdiscord.coordinate.CoordinateCommandExecutor;
-import com.emmad.mcdiscord.coordinate.CoordinateManager;
+import github.emmadusmani.mcdiscord.coordinate.CoordinateCommandExecutor;
+import github.emmadusmani.mcdiscord.coordinate.CoordinateManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
