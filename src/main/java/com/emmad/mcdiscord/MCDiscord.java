@@ -12,11 +12,8 @@ public final class MCDiscord extends JavaPlugin {
 
         try {
             this.discordBot = new DiscordBot(this);
-            CoordinateManager.discordBot = discordBot;
-
-            CoordinateManager.loadCoordinates();
-
-            new MCDiscordCommandExecutor(this);
+            CoordinateManager coordinateManager = new CoordinateManager(this, discordBot);
+            new MCDiscordCommandExecutor(this, coordinateManager);
 
         } catch (Exception e) {
             getLogger().info(ChatColor.RED + e.getMessage());

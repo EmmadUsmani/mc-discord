@@ -11,9 +11,12 @@ import java.util.Collection;
 
 public class MCDiscordCommandExecutor implements CommandExecutor {
     private final MCDiscord plugin;
+    private final CoordinateManager coordinateManager;
 
-    public MCDiscordCommandExecutor(MCDiscord plugin) {
+    public MCDiscordCommandExecutor(MCDiscord plugin, CoordinateManager coordinateManager) {
         this.plugin = plugin;
+        this.coordinateManager = coordinateManager;
+
         this.plugin.getCommand("save-coord").setExecutor(this);
         this.plugin.getCommand("delete-coord").setExecutor(this);
         this.plugin.getCommand("list-coords").setExecutor(this);
@@ -76,7 +79,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
         }
 
         try {
-            CoordinateManager.saveCoordinate(name, player.getName(), location);
+            coordinateManager.saveCoordinate(name, player.getName(), location);
             sender.sendMessage(ChatColor.GREEN + "Coordinate saved.");
         } catch (CoordinateManager.DuplicateCoordinateException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -104,7 +107,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
 
         String name = args[0];
         try {
-            CoordinateManager.deleteCoordinate(name, sender.getName());
+            coordinateManager.deleteCoordinate(name, sender.getName());
             sender.sendMessage(ChatColor.GREEN + "Coordinate deleted.");
         } catch (CoordinateManager.CoordinateDoesNotExistException
                 | CoordinateManager.PlayerLacksPermissionException e) {
@@ -122,7 +125,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
             return false;
         }
 
-        Collection<CoordinateManager.Coordinate> coordinates = CoordinateManager.getCoordinates();
+        Collection<CoordinateManager.Coordinate> coordinates = coordinateManager.getCoordinates();
         if (coordinates.isEmpty()) {
             sender.sendMessage("There are no saved coordinates. You can save a coordinate with "
                     + ChatColor.AQUA + "/save-cord" + ChatColor.RESET + ".");
@@ -147,7 +150,7 @@ public class MCDiscordCommandExecutor implements CommandExecutor {
 
         String name = args[0];
         try {
-            CoordinateManager.Coordinate coord = CoordinateManager.getCoordinate(name);
+            CoordinateManager.Coordinate coord = coordinateManager.getCoordinate(name);
             sender.sendMessage(coord.toMinecraftString());
         } catch (CoordinateManager.CoordinateDoesNotExistException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());

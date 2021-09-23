@@ -1,79 +1,96 @@
 package com.emmad.mcdiscord;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.javacord.api.entity.message.Message;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 public class CoordinateManager {
-    public static DiscordBot discordBot;
-    private static final HashMap<String, Coordinate> coordMap = new HashMap<>();
+    private final JavaPlugin plugin;
+    private final DiscordBot discordBot;
+    private final Map<String, Coordinate> coordinateMap;
 
-    public static void loadCoordinates() throws DiscordBot.RequestFailedException {
+    public CoordinateManager(JavaPlugin plugin, DiscordBot discordBot) throws InitializationFailedException {
+        this.plugin = plugin;
+        this.discordBot = discordBot;
+        this.coordinateMap = new HashMap<>();
+
+        try {
+            loadCoordinates();
+        } catch (DiscordBot.RequestFailedException e){
+            throw new InitializationFailedException("Failed to load coordinates from Discord.");
+        }
+    }
+
+    public void loadCoordinates() throws DiscordBot.RequestFailedException {
         Message[] messages = discordBot.getCoordinateMessages();
 
         for (Message message : messages) {
             try {
-                Coordinate coordinate = deserializeCoordinate(message.getContent());
-                if (coordMap.containsKey(coordinate.name)) {
+                Coordinate coordinate = deserializeCoordinate(message);
+                if (coordinateMap.containsKey(coordinate.name)) {
                     throw new DuplicateCoordinateException(coordinate.name);
                 } else {
                     coordinate.setMessageId(message.getIdAsString());
-                    coordMap.put(coordinate.name, coordinate);
+                    coordinateMap.put(coordinate.name, coordinate);
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage()); // TODO: use plugin's logger instead
+                plugin.getLogger().info(ChatColor.YELLOW + e.getMessage());
             }
         }
     }
 
-    public static void saveCoordinate(String name, String addedBy, Location location)
+    public void saveCoordinate(String name, String addedBy, Location location)
             throws DuplicateCoordinateException, DiscordBot.RequestFailedException {
-        name = CoordinateManager.normalizeName(name);
-        if (CoordinateManager.coordMap.containsKey(name)) {
+        name = normalizeName(name);
+        if (coordinateMap.containsKey(name)) {
             throw new DuplicateCoordinateException(name);
         }
 
         Coordinate coordinate = new Coordinate(name, addedBy, location);
         discordBot.postCoordinateMessage(coordinate);
-        CoordinateManager.coordMap.put(name, coordinate);
+        coordinateMap.put(name, coordinate);
     }
 
-    public static void deleteCoordinate(String name, String playerName)
+    public void deleteCoordinate(String name, String playerName)
             throws CoordinateDoesNotExistException, PlayerLacksPermissionException, DiscordBot.RequestFailedException {
-        name = CoordinateManager.normalizeName(name);
-        if (!CoordinateManager.coordMap.containsKey(name)) {
+        name = normalizeName(name);
+        if (!coordinateMap.containsKey(name)) {
             throw new CoordinateDoesNotExistException(name);
         }
 
-        Coordinate coordinate = CoordinateManager.coordMap.get(name);
+        Coordinate coordinate = coordinateMap.get(name);
         if (!playerName.equals(coordinate.addedBy)) {
             throw new PlayerLacksPermissionException(coordinate.addedBy);
         }
 
         discordBot.deleteCoordinateMessage(coordinate);
-        CoordinateManager.coordMap.remove(name);
+        coordinateMap.remove(name);
     }
 
-    public static Collection<Coordinate> getCoordinates() {
-        return CoordinateManager.coordMap.values();
+    public Collection<Coordinate> getCoordinates() {
+        return coordinateMap.values();
     }
 
-    public static Coordinate getCoordinate(String name) throws CoordinateDoesNotExistException {
-        name = CoordinateManager.normalizeName(name);
-        if (!CoordinateManager.coordMap.containsKey(name)) {
+    public Coordinate getCoordinate(String name) throws CoordinateDoesNotExistException {
+        name = normalizeName(name);
+        if (!coordinateMap.containsKey(name)) {
             throw new CoordinateDoesNotExistException(name);
         }
-        return CoordinateManager.coordMap.get(name);
+        return coordinateMap.get(name);
     }
 
-    private static Coordinate deserializeCoordinate(String messageContent) throws InvalidMessageException {
+    private static Coordinate deserializeCoordinate(Message message) throws InvalidMessageException {
+        String messageContent = message.getContent();
         String[] lines = messageContent.split("\n");
         if (lines.length != 3) {
-            throw new InvalidMessageException(messageContent);
+            throw new InvalidMessageException(message);
         }
 
         String name = lines[0];
@@ -82,13 +99,13 @@ public class CoordinateManager {
         String locationStr = lines[2];
         String[] values = locationStr.split(" ");
         if (values.length != 3) {
-            throw new InvalidMessageException(messageContent);
+            throw new InvalidMessageException(message);
         }
         double[] doubleValues;
         try {
             doubleValues = Arrays.stream(values).mapToDouble(Double::parseDouble).toArray();
         } catch (NumberFormatException e) {
-            throw new InvalidMessageException(messageContent);
+            throw new InvalidMessageException(message);
         }
         Location location = new Location(Bukkit.getWorld("world"), doubleValues[0],
                 doubleValues[1], doubleValues[2]);
@@ -133,9 +150,16 @@ public class CoordinateManager {
         }
     }
 
+    public static class InitializationFailedException extends Exception {
+        public InitializationFailedException(String message) {
+            super(message);
+        }
+    }
+
     public static class InvalidMessageException extends Exception {
-        public InvalidMessageException(String coordinateMessageContent) {
-            super("Message:\n" + coordinateMessageContent + "\nis not a valid coordinate.");
+        public InvalidMessageException(Message message) {
+            super("Message with id " + message.getIdAsString() + " is not a valid coordinate. " +
+                    "Please refrain from posting messages in the coordinate channel.");
         }
     }
 
