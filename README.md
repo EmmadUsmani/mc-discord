@@ -2,13 +2,13 @@
 
 ## About
 
-MC Discord is a Minecraft server plugin that adds in-game commands that perform actions on your Discord server. It is compatible with Spigot and Paper servers.
+MC Discord is a Minecraft server plugin that adds in-game commands to perform actions on your Discord server. It is compatible with Spigot and Paper servers.
 
 ## Features
 
 ### Coordinates
 
-MC Discord can post coordinates to a specified text channel using in game commands. These coordinates can be viewed either in Discord or in game.
+MC Discord can post coordinates to a specified text channel using in game commands. These coordinates can be viewed either in Discord or in-game.
 
 ## Commands
 

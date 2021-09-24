@@ -3,9 +3,9 @@
 ## Installing the Plugin
 
 1. Download the plugin JAR file.
-2. Place the JAR file inside the "plugins" folder of your server.
+2. Place the JAR file inside the `plugins` folder of your server.
 3. Run your server.
-4. Edit the "config.yml" file inside the "plugins/MCDiscord" folder, supplying "discord-bot-token" and "discord-coordinate-channel-id" with your bot token and the id of the text channel you wish to save coordinates to. Read the steps below if you do not know how to get your bot token and channel id.
+4. Edit the `config.yml` file inside the `plugins/MCDiscord` folder, supplying `discord-bot-token` and `discord-coordinate-channel-id` with your bot token and the id of the text channel you wish to save coordinates to. Read the steps below if you do not know how to get your bot token and channel id.
 5. Restart the server.
 
 ## Creating a Bot
@@ -27,7 +27,7 @@
 
    </details>
 
-4. Navigate to the "OAuth2" tab, check the "bot" box in the "Scope" panel, then copy the inviatation link at the bottom of the panel.
+4. Navigate to the "OAuth2" tab, check the "bot" box in the "Scopes" panel, then copy the invitation link at the bottom of the panel.
    <details>
    <summary>Image</summary>
 
@@ -43,7 +43,7 @@
 
    </details>
 
-6. Return to the [developer portal](https://discord.com/developers/applications), go to your app, and again navigate to the "Bot" tab, and press "copy" to copy your bot token.
+6. Return to the [developer portal](https://discord.com/developers/applications), go to your app, and again navigate to the "Bot" tab, and press "Copy" to copy your bot token.
    <details>
    <summary>Image</summary>
 
@@ -51,11 +51,11 @@
 
    </details>
 
-7. Paste this bot token into your "config.yml" file (located in your Minecraft server in the "plugins/MCDiscord" folder), replacing the "null" value of the "discord-bot-token" field.
+7. Paste this bot token into your `config.yml` file (located in your Minecraft server in the `plugins/MCDiscord` folder), replacing the `null` value of the `discord-bot-token` field.
 
 ## Getting Your Channel's ID
 
-1. Naviate to your Discord user settings.
+1. Navigate to your Discord user settings.
    <details>
    <summary>Image</summary>
 
@@ -71,7 +71,7 @@
 
    </details>
 
-3. Naviate to your Discord server and find or create the text channel you wish to post coordinates to. It is recommended to use a dedicated channel for this purpose in which users cannot post.
+3. Navigate to your Discord server and find or create the text channel you wish to post coordinates to. It is recommended to use a dedicated channel for this purpose in which users cannot post.
 4. Right click on the channel's name and select "Copy ID".
    <details>
    <summary>Image</summary>
@@ -80,4 +80,4 @@
 
    </details>
 
-5. Paste this id into your "config.yml" file (located in your Minecraft server in the "plugins/MCDiscord" folder), replacing the "null" value of the "discord-coordinate-channel-id" field.
+5. Paste this id into your `config.yml` file (located in your Minecraft server in the `plugins/MCDiscord` folder), replacing the `null` value of the `discord-coordinate-channel-id` field.
