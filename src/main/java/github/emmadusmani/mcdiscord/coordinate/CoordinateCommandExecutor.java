@@ -13,11 +13,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Collection;
 
+/**
+ * Defines and registers command executors for coordinate commands.
+ */
 public class CoordinateCommandExecutor implements CommandExecutor {
     private final JavaPlugin plugin;
     private final CoordinateManager coordinateManager;
 
-    public CoordinateCommandExecutor(Main plugin, CoordinateManager coordinateManager) throws InitializationFailedException {
+    /**
+     * Registers command executors.
+     *
+     * @param plugin            the plugin itself, defined in Main
+     * @param coordinateManager global CoordinateManager instance for the program
+     * @throws InitializationFailedException if commands are not defined in plugin.yml
+     */
+    public CoordinateCommandExecutor(Main plugin, CoordinateManager coordinateManager)
+            throws InitializationFailedException {
         this.plugin = plugin;
         this.coordinateManager = coordinateManager;
 
@@ -33,24 +44,34 @@ public class CoordinateCommandExecutor implements CommandExecutor {
 
     }
 
+    /**
+     * Called when a command is issued. Delegates execution to handlers.
+     *
+     * @param sender  issuer of command (console or player)
+     * @param command unused
+     * @param label   unused
+     * @param args    arguments provided when command was issued
+     * @return boolean indicating whether to return usage prompt (defined in plugin.yml)
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("save-coord")) {
-            return handleSaveCoord(sender, command, label, args);
+            return handleSaveCoord(sender, args);
         }
         if (command.getName().equalsIgnoreCase("delete-coord")) {
-            return handleDeleteCoord(sender, command, label, args);
+            return handleDeleteCoord(sender, args);
         }
         if (command.getName().equalsIgnoreCase("list-coords")) {
-            return handleListCoords(sender, command, label, args);
+            return handleListCoords(sender, args);
         }
         if (command.getName().equalsIgnoreCase("get-coord")) {
-            return handleGetCoord(sender, command, label, args);
+            return handleGetCoord(sender, args);
         }
         return false;
     }
 
-    private boolean handleSaveCoord(CommandSender sender, Command command, String label, String[] args) {
+    private boolean handleSaveCoord(CommandSender sender, String[] args) {
+        // handle invalid inputs
         if (!(sender instanceof Player)) {
             CommandResponse.userError(sender, "Command must be run by a player.");
             return true;
@@ -70,6 +91,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             return false;
         }
 
+        // get location and coordinate name
         Location location;
         String name = args[0];
         Player player = (Player) sender;
@@ -88,6 +110,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             }
         }
 
+        // save coordinate
         try {
             coordinateManager.saveCoordinate(name, player.getName(), location);
             CommandResponse.confirmation(sender, "Coordinate saved.");
@@ -101,7 +124,8 @@ public class CoordinateCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private boolean handleDeleteCoord(CommandSender sender, Command command, String label, String[] args) {
+    private boolean handleDeleteCoord(CommandSender sender, String[] args) {
+        // handle invalid inputs
         if (!(sender instanceof Player)) {
             CommandResponse.userError(sender, "Command must be run by a player.");
             return true;
@@ -115,6 +139,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             return false;
         }
 
+        // delete coordinate
         String name = args[0];
         try {
             coordinateManager.deleteCoordinate(name, sender.getName());
@@ -126,15 +151,18 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             CommandResponse.serverError(sender, "Failed to delete coordinate, see server log.");
             plugin.getLogger().severe(e.getMessage());
         }
+
         return true;
     }
 
-    private boolean handleListCoords(CommandSender sender, Command command, String label, String[] args) {
+    private boolean handleListCoords(CommandSender sender, String[] args) {
+        // handle invalid input
         if (args.length > 0) {
             CommandResponse.userError(sender, "Too many arguments.");
             return false;
         }
 
+        // get and display coordinates
         Collection<CoordinateManager.Coordinate> coordinates = coordinateManager.getCoordinates();
         if (coordinates.isEmpty()) {
             CommandResponse.info(sender, "There are no saved coordinates. You can save a coordinate with "
@@ -148,7 +176,8 @@ public class CoordinateCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private boolean handleGetCoord(CommandSender sender, Command command, String label, String[] args) {
+    private boolean handleGetCoord(CommandSender sender, String[] args) {
+        // handle invalid inputs
         if (args.length < 1) {
             CommandResponse.userError(sender, "Must specify a coordinate name.");
             return false;
@@ -158,6 +187,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             return false;
         }
 
+        // get and display coordinate
         String name = args[0];
         try {
             CoordinateManager.Coordinate coordinate = coordinateManager.getCoordinate(name);

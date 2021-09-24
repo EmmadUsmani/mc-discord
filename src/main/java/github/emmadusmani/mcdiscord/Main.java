@@ -7,6 +7,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
     private DiscordBot discordBot;
 
+    /**
+     * Called when server loads plugin on startup.
+     */
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
@@ -22,6 +25,9 @@ public final class Main extends JavaPlugin {
         }
     }
 
+    /**
+     * Called when server disables plugin on shutdown.
+     */
     @Override
     public void onDisable() {
         if (discordBot != null) {

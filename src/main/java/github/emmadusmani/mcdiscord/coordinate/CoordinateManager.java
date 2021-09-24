@@ -11,11 +11,22 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global coordinate state manager. Handles coordinate operations in memory and
+ * executes api calls via DiscordBot.
+ */
 public class CoordinateManager {
     private final JavaPlugin plugin;
     private final DiscordBot discordBot;
     private final Map<String, Coordinate> coordinateMap;
 
+    /**
+     * Populates coordinate data structure in memory.
+     *
+     * @param plugin     the plugin itself, defined in Main
+     * @param discordBot global DiscordBot instance for the program
+     * @throws InitializationFailedException if populating coordinates from Discord fails
+     */
     public CoordinateManager(JavaPlugin plugin, DiscordBot discordBot) throws InitializationFailedException {
         this.plugin = plugin;
         this.discordBot = discordBot;
@@ -23,11 +34,14 @@ public class CoordinateManager {
 
         try {
             loadCoordinates();
-        } catch (DiscordBot.RequestFailedException e){
+        } catch (DiscordBot.RequestFailedException e) {
             throw new InitializationFailedException("Failed to load coordinates from Discord.", e);
         }
     }
 
+    /**
+     * Gets messages from Discord, then deserializes and loads coordinates into memory.
+     */
     public void loadCoordinates() throws DiscordBot.RequestFailedException {
         Message[] messages = discordBot.getCoordinateMessages();
 
@@ -40,53 +54,75 @@ public class CoordinateManager {
                     coordinate.setMessageId(message.getIdAsString());
                     coordinateMap.put(coordinate.name, coordinate);
                 }
-            } catch (Exception e) {
+            } catch (InvalidMessageException | DuplicateCoordinateException e) {
                 plugin.getLogger().warning(e.getMessage());
             }
         }
     }
 
-    public void saveCoordinate(String name, String addedBy, Location location)
+    /**
+     * Saves a new Coordinate in memory and posts in Discord channel.
+     */
+    public void saveCoordinate(String coordinateName, String addedBy, Location location)
             throws DuplicateCoordinateException, DiscordBot.RequestFailedException {
-        name = normalizeName(name);
-        if (coordinateMap.containsKey(name)) {
-            throw new DuplicateCoordinateException(name);
+        // check if name already exists
+        coordinateName = normalizeName(coordinateName);
+        if (coordinateMap.containsKey(coordinateName)) {
+            throw new DuplicateCoordinateException(coordinateName);
         }
 
-        Coordinate coordinate = new Coordinate(name, addedBy, location);
+        // save
+        Coordinate coordinate = new Coordinate(coordinateName, addedBy, location);
         discordBot.postCoordinateMessage(coordinate);
-        coordinateMap.put(name, coordinate);
+        coordinateMap.put(coordinateName, coordinate);
     }
 
-    public void deleteCoordinate(String name, String playerName)
+    /**
+     * Removes Coordinate from memory and Discord channel.
+     */
+    public void deleteCoordinate(String coordinateName, String playerName)
             throws CoordinateDoesNotExistException, PlayerLacksPermissionException, DiscordBot.RequestFailedException {
-        name = normalizeName(name);
-        if (!coordinateMap.containsKey(name)) {
-            throw new CoordinateDoesNotExistException(name);
+        // check if name doesn't exist
+        coordinateName = normalizeName(coordinateName);
+        if (!coordinateMap.containsKey(coordinateName)) {
+            throw new CoordinateDoesNotExistException(coordinateName);
         }
-
-        Coordinate coordinate = coordinateMap.get(name);
+        // check if player issuing command created the coordinate
+        Coordinate coordinate = coordinateMap.get(coordinateName);
         if (!playerName.equals(coordinate.addedBy)) {
             throw new PlayerLacksPermissionException(coordinate.addedBy);
         }
 
+        // delete
         discordBot.deleteCoordinateMessage(coordinate);
-        coordinateMap.remove(name);
+        coordinateMap.remove(coordinateName);
     }
 
+    /**
+     * Gets all Coordinates that have been saved.
+     */
     public Collection<Coordinate> getCoordinates() {
         return coordinateMap.values();
     }
 
-    public Coordinate getCoordinate(String name) throws CoordinateDoesNotExistException {
-        name = normalizeName(name);
-        if (!coordinateMap.containsKey(name)) {
-            throw new CoordinateDoesNotExistException(name);
+    /**
+     * Gets Coordinate with given name.
+     */
+    public Coordinate getCoordinate(String coordinateName) throws CoordinateDoesNotExistException {
+        // check if name doesn't exist
+        coordinateName = normalizeName(coordinateName);
+        if (!coordinateMap.containsKey(coordinateName)) {
+            throw new CoordinateDoesNotExistException(coordinateName);
         }
-        return coordinateMap.get(name);
+
+        return coordinateMap.get(coordinateName);
     }
 
+    /**
+     * Deserializes a Discord Message describing a coordinate into a Coordinate object.
+     */
     private static Coordinate deserializeCoordinate(Message message) throws InvalidMessageException {
+        // get lines
         String messageContent = message.getContent();
         String[] lines = messageContent.split("\n");
         if (lines.length != 3) {
@@ -96,6 +132,7 @@ public class CoordinateManager {
         String name = lines[0];
         String addedBy = lines[1];
 
+        // parse location from third line
         String locationStr = lines[2];
         String[] values = locationStr.split(" ");
         if (values.length != 3) {
@@ -113,10 +150,16 @@ public class CoordinateManager {
         return new Coordinate(name, addedBy, location);
     }
 
-    private static String normalizeName(String name) {
-        return name.toLowerCase();
+    /**
+     * Normalizes user provided coordinate name into a standard format.
+     */
+    private static String normalizeName(String coordinateName) {
+        return coordinateName.toLowerCase();
     }
 
+    /**
+     * Object representing a coordinate in memory.
+     */
     public static class Coordinate {
         public String name;
         public String addedBy;
@@ -129,10 +172,16 @@ public class CoordinateManager {
             this.location = location;
         }
 
+        /**
+         * Sets the id of the message associated with this coordinate in Discord.
+         */
         public void setMessageId(String id) {
             this.messageId = id;
         }
 
+        /**
+         * Serializes coordinate to display in Minecraft.
+         */
         public String toMinecraftString() {
             return this.name + " | "
                     + this.addedBy + " | "
@@ -141,6 +190,9 @@ public class CoordinateManager {
                     + this.location.getBlockZ();
         }
 
+        /**
+         * Serializes coordinate to post to Discord.
+         */
         public String toDiscordString() {
             return this.name + "\n"
                     + this.addedBy + "\n"
