@@ -10,6 +10,13 @@ MC Discord is a Minecraft server plugin that adds in-game commands to perform ac
 
 MC Discord can post coordinates to a specified text channel using in game commands. These coordinates can be viewed either in Discord or in-game.
 
+<details>
+<summary>Demo</summary>
+
+![Demo](docs/images/demo.gif)
+
+</details>
+
 ## Commands
 
 - /save-coord _name [x y z]_
