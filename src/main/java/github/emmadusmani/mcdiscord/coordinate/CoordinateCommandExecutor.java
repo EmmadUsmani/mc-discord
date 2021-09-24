@@ -28,7 +28,7 @@ public class CoordinateCommandExecutor implements CommandExecutor {
             this.plugin.getCommand("get-coord").setExecutor(this);
         } catch (NullPointerException e) {
             throw new InitializationFailedException("NullPointerException while calling setExecutor." +
-                    " Developer, make sure commands are defined in plugin.yml.");
+                    " Developer, make sure commands are defined in plugin.yml.", e);
         }
 
     }
@@ -170,8 +170,8 @@ public class CoordinateCommandExecutor implements CommandExecutor {
     }
 
     public static class InitializationFailedException extends Exception {
-        public InitializationFailedException(String message) {
-            super(message);
+        public InitializationFailedException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

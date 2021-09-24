@@ -24,7 +24,7 @@ public class CoordinateManager {
         try {
             loadCoordinates();
         } catch (DiscordBot.RequestFailedException e){
-            throw new InitializationFailedException("Failed to load coordinates from Discord.");
+            throw new InitializationFailedException("Failed to load coordinates from Discord.", e);
         }
     }
 
@@ -151,8 +151,8 @@ public class CoordinateManager {
     }
 
     public static class InitializationFailedException extends Exception {
-        public InitializationFailedException(String message) {
-            super(message);
+        public InitializationFailedException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 

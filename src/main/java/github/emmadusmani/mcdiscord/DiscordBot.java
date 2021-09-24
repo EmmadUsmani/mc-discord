@@ -29,13 +29,13 @@ public class DiscordBot {
             this.api = new DiscordApiBuilder().setToken(botToken).login().join();
         } catch (Exception e) {
             throw new InitializationFailedException("Failed to initialize DiscordApi." +
-                    " Make sure the bot token you provided is valid.");
+                    " Make sure the bot token you provided is valid.", e);
         }
 
         Optional<TextChannel> optional = api.getTextChannelById(channelId);
         if (!optional.isPresent()) {
-            throw new InitializationFailedException("Coordinate text channel with provided id "
-                    + channelId + " does not exist.");
+            throw new InitializationFailedException("Coordinate text channel with provided id " +
+                    channelId + " does not exist.");
         }
         this.coordinateChannel = optional.get();
     }
@@ -45,7 +45,7 @@ public class DiscordBot {
             Message message = coordinateChannel.sendMessage(coordinate.toDiscordString()).join();
             coordinate.setMessageId(message.getIdAsString());
         } catch (Exception e) {
-            throw new RequestFailedException(e.getMessage());
+            throw new RequestFailedException("Failed to post coordinate to Discord.", e);
         }
     }
 
@@ -53,7 +53,7 @@ public class DiscordBot {
         try {
             coordinateChannel.deleteMessages(coordinate.messageId).join();
         } catch (Exception e) {
-            throw new RequestFailedException(e.getMessage());
+            throw new RequestFailedException("Failed to delete coordinate from Discord.", e);
         }
     }
 
@@ -61,7 +61,7 @@ public class DiscordBot {
         try {
             return coordinateChannel.getMessagesAsStream().toArray(Message[]::new);
         } catch (Exception e) {
-            throw new RequestFailedException(e.getMessage());
+            throw new RequestFailedException("Failed to get coordinates from Discord.", e);
         }
     }
 
@@ -75,11 +75,15 @@ public class DiscordBot {
         public InitializationFailedException(String message) {
             super(message);
         }
+
+        public InitializationFailedException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     public static class RequestFailedException extends Exception {
-        public RequestFailedException(String message) {
-            super(message);
+        public RequestFailedException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }
