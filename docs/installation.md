@@ -2,7 +2,7 @@
 
 ## Installing the Plugin
 
-1. Download the plugin JAR file.
+1. Download the [plugin JAR file](https://github.com/EmmadUsmani/mc-discord/releases/download/v0.1/mc-discord-0.1.jar).
 2. Place the JAR file inside the `plugins` folder of your server.
 3. Run your server.
 4. Edit the `config.yml` file inside the `plugins/MCDiscord` folder, supplying `discord-bot-token` and `discord-coordinate-channel-id` with your bot token and the id of the text channel you wish to save coordinates to. Read the steps below if you do not know how to get your bot token and channel id.
