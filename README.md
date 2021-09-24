@@ -2,7 +2,7 @@
 
 ## About
 
-MC Discord is a Minecraft server plugin that adds in-game commands to perform actions on your Discord server. It is compatible with Spigot and Paper servers.
+MC Discord is a Minecraft server plugin that adds in-game commands to perform actions on your Discord server. It is compatible with [Spigot](https://www.spigotmc.org/) and [Paper](https://papermc.io/) servers.
 
 ## Features
 
